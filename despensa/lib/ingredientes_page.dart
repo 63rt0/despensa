@@ -1,21 +1,39 @@
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IngredientesPage extends StatefulWidget {
-  const IngredientesPage({super.key, required this.title});
-
-  final String title;
+  const IngredientesPage({Key? key}) : super(key: key);
 
   @override
   IngredientesPageState createState() => IngredientesPageState();
+
+  static Future<List<String>> loadIngredientes() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList('ingredientes') ?? [];
+  }
+
+  static Future<void> saveIngredientes(List<String> ingredientes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('ingredientes', ingredientes);
+  }
 }
 
 class IngredientesPageState extends State<IngredientesPage> {
-  List<String> listaIngredientes = ['Huevos', 'Patatas', 'Leche'];
+  List<String> listaIngredientes = [];
 
   final TextEditingController _textEditingController = TextEditingController();
 
-  void _createText() {
+  @override
+  void initState() {
+    super.initState();
+    IngredientesPage.loadIngredientes().then((ingredientes) {
+      setState(() {
+        listaIngredientes = ingredientes;
+      });
+    });
+  }
+
+  void _createIngrediente() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -23,7 +41,8 @@ class IngredientesPageState extends State<IngredientesPage> {
           title: const Text('Añadir ingrediente'),
           content: TextField(
             controller: _textEditingController,
-            decoration: const InputDecoration(hintText: 'Escribe el ingrediente'),
+            decoration:
+                const InputDecoration(hintText: 'Escribe el ingrediente'),
           ),
           actions: [
             TextButton(
@@ -31,6 +50,7 @@ class IngredientesPageState extends State<IngredientesPage> {
                 setState(() {
                   String enteredText = _textEditingController.text;
                   listaIngredientes.add(enteredText);
+                  IngredientesPage.saveIngredientes(listaIngredientes);
                   _textEditingController.clear();
                   Navigator.of(context).pop();
                 });
@@ -47,7 +67,6 @@ class IngredientesPageState extends State<IngredientesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Ingredientes'),
       ),
       body: Center(
@@ -59,23 +78,24 @@ class IngredientesPageState extends State<IngredientesPage> {
               title: Text(listaIngredientes[index]),
               trailing: IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => _removeText(index),
+                onPressed: () => _removeIngrediente(index),
               ),
             );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _createText,
+        onPressed: _createIngrediente,
         tooltip: 'Añadir',
         child: const Icon(Icons.add),
       ),
     );
   }
-  
-  void _removeText(int index) {
+
+  void _removeIngrediente(int index) {
     setState(() {
       listaIngredientes.removeAt(index);
+      IngredientesPage.saveIngredientes(listaIngredientes);
     });
   }
 }
