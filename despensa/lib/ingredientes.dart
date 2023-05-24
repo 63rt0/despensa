@@ -42,7 +42,11 @@ class Ingredientes {
   factory Ingredientes.fromJson(Map<String, dynamic> json) =>
       _$IngredientesFromJson(json);
 
-  Map<String, dynamic> toJson() => _$IngredientesToJson(this);
+  Map<String, dynamic> toJson() {
+  return {
+    'hashMap': hashMap,
+  };
+}
 
   static Future<void> save(Ingredientes ingredientes) async {
     final prefs = await SharedPreferences.getInstance();
@@ -59,7 +63,7 @@ class Ingredientes {
       final ingredientesMap =
           jsonDecode(ingredientesJson) as Map<String, dynamic>;
       final hashMapIngredientes =
-          Ingredientes._hashMapFromJson(ingredientesMap);
+          _hashMapFromJson(ingredientesMap['hashMap']);
           
     print('Datos cargador de SharedPreferences: $hashMapIngredientes');
       return Ingredientes(hashMapIngredientes);
