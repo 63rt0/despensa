@@ -1,58 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'data.dart';
+import 'receta.dart';
 
 class RecetasPage extends StatefulWidget {
   const RecetasPage({Key? key}) : super(key: key);
 
   @override
   RecetasPageState createState() => RecetasPageState();
-
-  static Future<List<Receta>> loadRecetas() async {
-    final prefs = await SharedPreferences.getInstance();
-    final recetasData = prefs.getStringList('recetas');
-
-    if (recetasData != null) {
-      final recetas = recetasData.map((data) {
-        final parts = data.split('|');
-        final nombre = parts[0];
-        final ingredientes = parts[1].split(',');
-        return Receta(nombre, ingredientes);
-      }).toList();
-
-      return recetas;
-    }
-
-    return [];
-  }
-
-  static Future<void> saveRecetas(List<Receta> recetas) async {
-    final prefs = await SharedPreferences.getInstance();
-    final recetasData = recetas.map((receta) {
-      final nombreData = receta.nombre;
-      final ingredientesData = receta.listaIngredientes.join(',');
-      return '$nombreData|$ingredientesData';
-    }).toList();
-
-    await prefs.setStringList('recetas', recetasData);
-  }
 }
 
 class RecetasPageState extends State<RecetasPage> {
-  List<Receta> listaRecetas = [];
-  List<String> selectedIngredientes = [];
   final TextEditingController _textEditingControllerIngredientes =
       TextEditingController();
   final TextEditingController _textEditingControllerNombre =
       TextEditingController();
-  @override
-  void initState() {
-    super.initState();
-    RecetasPage.loadRecetas().then((recetas) {
-      setState(() {
-        listaRecetas = recetas;
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +23,11 @@ class RecetasPageState extends State<RecetasPage> {
       ),
       body: Center(
         child: ListView.separated(
-          itemCount: listaRecetas.length,
+          itemCount: Data().recetas.length,
           separatorBuilder: (context, index) => const Divider(),
           itemBuilder: (context, index) {
             return ListTile(
-              title: Text(listaRecetas[index].nombre),
+              title: Text(Data().recetas[index].nombre),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -85,14 +46,14 @@ class RecetasPageState extends State<RecetasPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _createReceta,
+        onPressed: _createRecetaDialog,
         tooltip: 'Añadir',
         child: const Icon(Icons.add),
       ),
     );
   }
 
-  void _createReceta() {
+  void _createRecetaDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -120,11 +81,8 @@ class RecetasPageState extends State<RecetasPage> {
                   String nombreReceta = _textEditingControllerNombre.text;
                   String ingredientesReceta =
                       _textEditingControllerIngredientes.text;
-                  List<String> listaIngredientesReceta =
-                      ingredientesReceta.trim().split(',');
-                  listaRecetas
-                      .add(Receta(nombreReceta, listaIngredientesReceta));
-                  RecetasPage.saveRecetas(listaRecetas);
+                      _addReceta(nombreReceta, ingredientesReceta);
+
                   Navigator.of(context).pop();
                 });
               },
@@ -136,10 +94,11 @@ class RecetasPageState extends State<RecetasPage> {
     );
   }
 
+
   void _editReceta(int index) {
-    String nombreAntiguo = listaRecetas[index].nombre;
-    String ingredientesAntiguo = listaRecetas[index].ingredientesToString();
-    
+    String nombreAntiguo = Data().recetas[index].nombre;
+    String ingredientesAntiguo = Data().recetas[index].nombresIngredientes();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -175,12 +134,8 @@ class RecetasPageState extends State<RecetasPage> {
                       (_textEditingControllerIngredientes.text == '')
                           ? ingredientesAntiguo
                           : _textEditingControllerIngredientes.text;
-                  List<String> listaIngredientesReceta =
-                      ingredientesReceta.trim().split(',');
-                  listaRecetas.removeAt(index);
-                  listaRecetas
-                      .add(Receta(nombreReceta, listaIngredientesReceta));
-                  RecetasPage.saveRecetas(listaRecetas);
+                  _removeReceta(index);
+                  _addReceta(nombreReceta, ingredientesReceta);
                   Navigator.of(context).pop();
                 });
               },
@@ -194,27 +149,16 @@ class RecetasPageState extends State<RecetasPage> {
 
   void _removeReceta(int index) {
     setState(() {
-      listaRecetas.removeAt(index);
-      RecetasPage.saveRecetas(listaRecetas);
+      Data().recetas.removeAt(index);
+      Data().saveRecetas();
+    });
+  }
+
+    void _addReceta(String nombreReceta, String ingredientesReceta) {
+    setState(() {
+      Receta.addReceta(nombreReceta, ingredientesReceta);
     });
   }
 }
 
-class Receta {
-  String nombre;
-  List<String> listaIngredientes = [];
 
-  Receta(this.nombre, this.listaIngredientes);
-
-
-  String ingredientesToString() {
-
-    String ingredientes = listaIngredientes[0];
-    for(var i=1; i<listaIngredientes.length;i++){
-      ingredientes += ', '+listaIngredientes[i];
-    }
-
-
-    return ingredientes;
-  }
-}
