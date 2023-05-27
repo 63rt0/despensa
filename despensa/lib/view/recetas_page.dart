@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'data.dart';
-import 'receta.dart';
+import '../data/data.dart';
+import '../main.dart';
 
 class RecetasPage extends StatefulWidget {
   const RecetasPage({Key? key}) : super(key: key);
@@ -50,6 +50,7 @@ class RecetasPageState extends State<RecetasPage> {
         tooltip: 'Añadir',
         child: const Icon(Icons.add),
       ),
+      bottomNavigationBar: const BottomNavigation(),
     );
   }
 
@@ -130,12 +131,12 @@ class RecetasPageState extends State<RecetasPage> {
                       (_textEditingControllerNombre.text == '')
                           ? nombreAntiguo
                           : _textEditingControllerNombre.text;
-                  String ingredientesReceta =
+                  String nombresIngredientes =
                       (_textEditingControllerIngredientes.text == '')
                           ? ingredientesAntiguo
                           : _textEditingControllerIngredientes.text;
                   _removeReceta(index);
-                  _addReceta(nombreReceta, ingredientesReceta);
+                  _addReceta(nombreReceta, nombresIngredientes);
                   Navigator.of(context).pop();
                 });
               },
@@ -154,9 +155,9 @@ class RecetasPageState extends State<RecetasPage> {
     });
   }
 
-    void _addReceta(String nombreReceta, String ingredientesReceta) {
+    void _addReceta(String nombreReceta, String nombresIngredientes) {
     setState(() {
-      Receta.addReceta(nombreReceta, ingredientesReceta);
+      Data().addReceta(nombreReceta, nombresIngredientes);
     });
   }
 }

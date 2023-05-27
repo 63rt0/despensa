@@ -1,40 +1,40 @@
 import 'dart:collection';
+import 'ingrediente.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'data.dart';
 
 part 'ingredientes.g.dart';
 
 @JsonSerializable()
 class Ingredientes {
   @JsonKey(fromJson: _hashMapFromJson, toJson: _hashMapToJson)
-  final HashMap<String, String> hashMap;
+  final HashMap<String, Ingrediente> hashMap;
 
   Ingredientes(this.hashMap);
 
-  static List<dynamic> addIngrediente(String nombre) {
-    nombre = Data.adecuateNombre(nombre);
-    String ingredienteKey = Data.keyForNombre(nombre);
-
-    Data().ingredientes.hashMap.putIfAbsent(ingredienteKey, () => nombre);
-    Data().saveIngredientes();
-
-    return [ingredienteKey, nombre];
+  void addIngrediente(String key, Ingrediente nuevoIngrediente) {
+    hashMap.putIfAbsent(key, () => nuevoIngrediente);
   }
 
-  static HashMap<String, String> _hashMapFromJson(Map<String, dynamic> json) {
-    final hashMap = HashMap<String, String>();
+  void removeIngrediente(String key) {
+    hashMap.remove(key);
+  }
+
+  static HashMap<String, Ingrediente> _hashMapFromJson(
+      Map<String, dynamic> json) {
+    final hashMap = HashMap<String, Ingrediente>();
     json.forEach((key, value) {
-      hashMap[key.toString()] = value.toString();
+      hashMap[key.toString()] = Ingrediente.fromJson(value);
     });
     return hashMap;
   }
 
-  static Map<String, dynamic> _hashMapToJson(HashMap<String, String> hashMap) {
+  static Map<String, dynamic> _hashMapToJson(
+      HashMap<String, Ingrediente> hashMap) {
     final json = <String, dynamic>{};
     hashMap.forEach((key, value) {
-      json[key.toString()] = value.toString();
+      json[key.toString()] = value.toJson();
     });
     return json;
   }
@@ -43,10 +43,10 @@ class Ingredientes {
       _$IngredientesFromJson(json);
 
   Map<String, dynamic> toJson() {
-  return {
-    'hashMap': hashMap,
-  };
-}
+    return {
+      'hashMap': hashMap,
+    };
+  }
 
   static Future<void> save(Ingredientes ingredientes) async {
     final prefs = await SharedPreferences.getInstance();
@@ -57,19 +57,18 @@ class Ingredientes {
   }
 
   static Future<Ingredientes> load() async {
+    //Ingredientes.clear();
     final prefs = await SharedPreferences.getInstance();
     final ingredientesJson = prefs.getString('ingredientes');
     if (ingredientesJson != null) {
       final ingredientesMap =
           jsonDecode(ingredientesJson) as Map<String, dynamic>;
-      final hashMapIngredientes =
-          _hashMapFromJson(ingredientesMap['hashMap']);
-          
-    print('Datos cargador de SharedPreferences: $hashMapIngredientes');
+      final hashMapIngredientes = _hashMapFromJson(ingredientesMap['hashMap']);
+      print('Datos cargados de SharedPreferences: $hashMapIngredientes');
       return Ingredientes(hashMapIngredientes);
     } else {
       print('No se encontraron datos en SharedPreferences');
-      return Ingredientes(HashMap<String, String>());
+      return Ingredientes(HashMap<String, Ingrediente>());
     }
   }
 }
