@@ -1,4 +1,6 @@
+import 'package:despensa/view/cocinables_page.dart';
 import 'package:flutter/material.dart';
+import 'view/despensa_page.dart';
 import 'view/ingredientes_page.dart';
 import 'view/compras_page.dart';
 import 'view/recetas_page.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
         '/ingredientes': (context) => const IngredientesPage(),
         '/compras': (context) => const ComprasPage(),
         '/recetas': (context) => const RecetasPage(),
+        '/despensa': (context) => const DespensaPage(),
+        '/cocinables': (context) => const CocinablesPage(),
       },
     );
   }
@@ -54,19 +58,31 @@ class BottomNavigation extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.egg),
             onPressed: () {
-              Navigator.pushNamed(context, '/ingredientes');
+              Navigator.popAndPushNamed(context, '/ingredientes');
             },
           ),
           IconButton(
             icon: Icon(Icons.menu_book),
             onPressed: () {
-              Navigator.pushNamed(context, '/recetas');
+              Navigator.popAndPushNamed(context, '/recetas');
             },
           ),
           IconButton(
-            icon: Icon(Icons.store, color: Colors.white),
+            icon: Icon(Icons.store),
             onPressed: () {
-              Navigator.pushNamed(context, '/compras');
+              Navigator.popAndPushNamed(context, '/compras');
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.warehouse),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/despensa');
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.soup_kitchen),
+            onPressed: () {
+              Navigator.popAndPushNamed(context, '/cocinables');
             },
           ),
         ],

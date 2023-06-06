@@ -40,42 +40,81 @@ class Data {
   }
 
   void removeIngrediente(String key) {
-    _ingredientes.removeIngrediente(key);
-    saveIngredientes();
+    ingredientes.removeIngrediente(key);
+    _saveIngredientes();
   }
 
   void removeIngredienteFrom(String key, Ingredientes otrosIngredientes) {
     otrosIngredientes.removeIngrediente(key);
   }
 
-  List<dynamic> addIngrediente(String nombre) {
-    List<dynamic> nuevoIngrediente = _createIngrediente(nombre);
-    _ingredientes.addIngrediente(nuevoIngrediente[0], nuevoIngrediente[1]);
-    saveIngredientes();
-    return nuevoIngrediente;
+  List<dynamic> addIngrediente(String nombre,
+      {bool despensa = false, bool compra = false}) {
+    List<dynamic> newIngredienteEntry =
+        _createIngredienteEntry(nombre, despensa: despensa, compra: compra);
+    ingredientes.addIngrediente(newIngredienteEntry[0], newIngredienteEntry[1]);
+    _saveIngredientes();
+    return newIngredienteEntry;
   }
 
-  List<dynamic> addIngredienteTo(
-      String nombre, Ingredientes otrosIngredientes) {
-    List<dynamic> nuevoIngrediente = _createIngrediente(nombre);
-    otrosIngredientes.addIngrediente(nuevoIngrediente[0], nuevoIngrediente[1]);
-    return nuevoIngrediente;
+  List<dynamic> addIngredienteTo(String nombre, Ingredientes otrosIngredientes,
+      {bool despensa = false, bool compra = false}) {
+    List<dynamic> newIngredienteEntry =
+        _createIngredienteEntry(nombre, despensa: despensa, compra: compra);
+    otrosIngredientes.addIngrediente(
+        newIngredienteEntry[0], newIngredienteEntry[1]);
+    return newIngredienteEntry;
+  }
+
+  void updateIngredienteCompra(String key, bool compra) {
+    ingredientes.updateIngredienteCompra(key, compra);
+    _saveIngredientes();
+  }
+
+  void updateIngredienteDespensa(String key, bool compra) {
+    ingredientes.updateIngredienteDespensa(key, compra);
+    _saveIngredientes();
   }
 
   Receta addReceta(String nombreReceta, String nombresIngredientes) {
     Receta nuevaReceta = _createReceta(nombreReceta, nombresIngredientes);
-    _recetas.add(nuevaReceta);
-    saveRecetas();
+    recetas.add(nuevaReceta);
+    _saveRecetas();
 
     return nuevaReceta;
   }
 
-  void saveIngredientes() {
-    Ingredientes.save(_ingredientes);
+  List<Receta> cocinables() {
+    List<Receta> cocinables = [];
+    Ingredientes ingredientesEnDespensa = filteredIngredientesInDespensa("");
+    for (Receta receta in recetas) {
+      bool cocinable = true;
+      for (Ingrediente ingrediente in receta.ingredientes.hashMap.values) {
+        if (ingredientesEnDespensa.hashMap
+                .containsKey(keyForNombre(ingrediente.nombre)) ==
+            false) {
+          cocinable = false;
+          break;
+        }
+      }
+      if (cocinable) {
+        cocinables.add(receta);
+      }
+    }
+    return cocinables;
   }
 
-  void saveRecetas() {
-    Receta.save(_recetas);
+  void removeReceta(int index) {
+    recetas.removeAt(index);
+    _saveRecetas();
+  }
+
+  void _saveIngredientes() {
+    Ingredientes.save(ingredientes);
+  }
+
+  void _saveRecetas() {
+    Receta.save(recetas);
   }
 
   static Future<void> clear(String datos) async {
@@ -96,9 +135,10 @@ class Data {
     return nombre.trim().replaceAll(RegExp(r'\[|\]|\.|\d+'), '').toLowerCase();
   }
 
-  List<dynamic> _createIngrediente(String nombre) {
+  List<dynamic> _createIngredienteEntry(String nombre,
+      {bool despensa = false, bool compra = false}) {
     nombre = adecuateNombre(nombre);
-    Ingrediente nuevoIngrediente = Ingrediente(nombre, false, false);
+    Ingrediente nuevoIngrediente = Ingrediente(nombre, despensa, compra);
 
     String key = keyForNombre(nombre);
 
@@ -129,8 +169,32 @@ class Data {
   Ingredientes filteredIngredientes(String searchTerm) {
     Ingredientes filteredIngredientes = Ingredientes(HashMap());
 
-    _ingredientes.hashMap.forEach((key, value) {
+    ingredientes.hashMap.forEach((key, value) {
       if (value.nombre.contains(searchTerm)) {
+        filteredIngredientes.hashMap[key] = value;
+      }
+    });
+
+    return filteredIngredientes;
+  }
+
+  Ingredientes filteredIngredientesInDespensa(String searchTerm) {
+    Ingredientes filteredIngredientes = Ingredientes(HashMap());
+
+    ingredientes.hashMap.forEach((key, value) {
+      if (value.despensa && value.nombre.contains(searchTerm)) {
+        filteredIngredientes.hashMap[key] = value;
+      }
+    });
+
+    return filteredIngredientes;
+  }
+
+  Ingredientes filteredIngredientesInCompra(String searchTerm) {
+    Ingredientes filteredIngredientes = Ingredientes(HashMap());
+
+    ingredientes.hashMap.forEach((key, value) {
+      if (value.compra && value.nombre.contains(searchTerm)) {
         filteredIngredientes.hashMap[key] = value;
       }
     });

@@ -6,8 +6,8 @@ part 'ingrediente.g.dart';
 @JsonSerializable()
 class Ingrediente {
   final String nombre;
-  final bool despensa;
-  final bool compra;
+  bool despensa;
+  bool compra;
 
   Ingrediente(this.nombre, this.despensa, this.compra);
 

@@ -150,8 +150,7 @@ class RecetasPageState extends State<RecetasPage> {
 
   void _removeReceta(int index) {
     setState(() {
-      Data().recetas.removeAt(index);
-      Data().saveRecetas();
+      Data().removeReceta(index);
     });
   }
 

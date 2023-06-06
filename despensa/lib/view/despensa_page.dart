@@ -6,14 +6,14 @@ import '../data/data.dart';
 import '../data/ingredientes.dart';
 import '../main.dart';
 
-class IngredientesPage extends StatefulWidget {
-  const IngredientesPage({Key? key}) : super(key: key);
+class DespensaPage extends StatefulWidget {
+  const DespensaPage({Key? key}) : super(key: key);
 
   @override
-  IngredientesPageState createState() => IngredientesPageState();
+  DespensaPageState createState() => DespensaPageState();
 }
 
-class IngredientesPageState extends State<IngredientesPage> {
+class DespensaPageState extends State<DespensaPage> {
   final TextEditingController _textEditingController = TextEditingController();
   TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
@@ -31,10 +31,10 @@ class IngredientesPageState extends State<IngredientesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredientes'),
+        title: const Text('Despensa'),
       ),
       body: Column(
-        children:[ 
+        children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -47,10 +47,10 @@ class IngredientesPageState extends State<IngredientesPage> {
           ),
           Expanded(
             child: ListView.separated(
-            itemCount: _filteredIngredientes.hashMap.length,
-            separatorBuilder: (context, index) => const Divider(),
-            itemBuilder: (context, index) {
-              return ListTile(
+              itemCount: _filteredIngredientes.hashMap.length,
+              separatorBuilder: (context, index) => const Divider(),
+              itemBuilder: (context, index) {
+                return ListTile(
                     title: Text(_filteredIngredientes.hashMap.values
                         .elementAt(index)
                         .nombre),
@@ -58,29 +58,24 @@ class IngredientesPageState extends State<IngredientesPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.warehouse),
-                          onPressed: () => _addIngredienteToDespensa(
-                              _filteredIngredientes.hashMap.keys
-                                  .elementAt(index)),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.store),
-                          onPressed: () => _addIngredienteToCompra(
+                          icon: const Icon(Icons.add_shopping_cart),
+                          onPressed: () => _moveIngredienteToCompra(
                               _filteredIngredientes.hashMap.keys
                                   .elementAt(index)),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete),
-                          onPressed: () => _removeIngrediente(
+                          onPressed: () => _removeIngredienteFromDespensa(
                               _filteredIngredientes.hashMap.keys
                                   .elementAt(index)),
                         ),
                       ],
                     ));
-            },
-                  ),
+              },
+            ),
           ),
-        ],),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createIngrediente,
         tooltip: 'Añadir',
@@ -92,7 +87,8 @@ class IngredientesPageState extends State<IngredientesPage> {
 
   void _filterIngredientes() {
     String searchTerm = _searchController.text.toLowerCase();
-    Ingredientes filteredIngredientes = Data().filteredIngredientes(searchTerm);
+    Ingredientes filteredIngredientes =
+        Data().filteredIngredientesInDespensa(searchTerm);
     setState(() {
       _filteredIngredientes = filteredIngredientes;
     });
@@ -113,7 +109,7 @@ class IngredientesPageState extends State<IngredientesPage> {
             TextButton(
               onPressed: () {
                 String nombreIngrediente = _textEditingController.text;
-                _addIngrediente(nombreIngrediente);
+                _addIngredienteToDespensa(nombreIngrediente);
                 _textEditingController.clear();
                 Navigator.of(context).pop();
               },
@@ -125,28 +121,25 @@ class IngredientesPageState extends State<IngredientesPage> {
     );
   }
 
-  void _removeIngrediente(String key) {
+  void _removeIngredienteFromDespensa(String key) {
     setState(() {
-      Data().removeIngrediente(key);
+      Data().updateIngredienteDespensa(key, false);
       Data().removeIngredienteFrom(key, _filteredIngredientes);
     });
   }
 
-  void _addIngredienteToCompra(String key) {
+  void _moveIngredienteToCompra(String key) {
     setState(() {
+      Data().updateIngredienteDespensa(key, false);
       Data().updateIngredienteCompra(key, true);
+      _filterIngredientes();
     });
   }
 
-    void _addIngredienteToDespensa(String key) {
+  void _addIngredienteToDespensa(String nombreIngrediente) {
     setState(() {
-      Data().updateIngredienteDespensa(key, true);
-    });
-  }
-
-  void _addIngrediente(String nombreIngrediente) {
-    setState(() {
-      Data().addIngrediente(nombreIngrediente);
+      List<dynamic> ingredienteEntry = Data().addIngrediente(nombreIngrediente);
+      Data().updateIngredienteDespensa(ingredienteEntry[0], true);
       _filterIngredientes();
     });
   }

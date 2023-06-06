@@ -20,6 +20,20 @@ class Ingredientes {
   void removeIngrediente(String key) {
     hashMap.remove(key);
   }
+  
+  void updateIngredienteDespensa(String key, bool despensa) {
+    Ingrediente toRemove = hashMap[key]!;
+    toRemove.despensa = despensa;
+    hashMap[key] = toRemove;
+  }
+
+    void updateIngredienteCompra(String key, bool compra) {
+    Ingrediente toRemove = hashMap[key]!;
+    toRemove.compra = compra;
+    hashMap[key] = toRemove;
+  }
+
+  
 
   static HashMap<String, Ingrediente> _hashMapFromJson(
       Map<String, dynamic> json) {
@@ -71,4 +85,6 @@ class Ingredientes {
       return Ingredientes(HashMap<String, Ingrediente>());
     }
   }
+
+
 }
