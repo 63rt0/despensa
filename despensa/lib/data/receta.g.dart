@@ -9,11 +9,13 @@ part of 'receta.dart';
 Receta _$RecetaFromJson(Map<String, dynamic> json) => Receta(
       json['id'] as String,
       json['nombre'] as String,
-      Ingredientes.fromJson(json['ingredientes'] as Map<String, dynamic>),
+      (json['idIngredientes'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$RecetaToJson(Receta instance) => <String, dynamic>{
       'id': instance.id,
       'nombre': instance.nombre,
-      'ingredientes': instance.ingredientes,
+      'idIngredientes': instance.idIngredientes,
     };

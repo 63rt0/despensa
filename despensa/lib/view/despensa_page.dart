@@ -33,6 +33,7 @@ class DespensaPageState extends State<DespensaPage> {
       appBar: AppBar(
         title: const Text('Despensa'),
       ),
+      drawer: const DrawerNavigation(),
       body: Column(
         children: [
           Padding(
@@ -57,6 +58,9 @@ class DespensaPageState extends State<DespensaPage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (!_filteredIngredientes.hashMap.values
+                            .elementAt(index)
+                            .compra)
                         IconButton(
                           icon: const Icon(Icons.add_shopping_cart),
                           onPressed: () => _moveIngredienteToCompra(
@@ -64,7 +68,7 @@ class DespensaPageState extends State<DespensaPage> {
                                   .elementAt(index)),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete),
+                          icon: const Icon(Icons.close),
                           onPressed: () => _removeIngredienteFromDespensa(
                               _filteredIngredientes.hashMap.keys
                                   .elementAt(index)),
@@ -130,7 +134,6 @@ class DespensaPageState extends State<DespensaPage> {
 
   void _moveIngredienteToCompra(String key) {
     setState(() {
-      Data().updateIngredienteDespensa(key, false);
       Data().updateIngredienteCompra(key, true);
       _filterIngredientes();
     });

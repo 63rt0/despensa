@@ -30,6 +30,7 @@ class Data {
   }
 
   List<Receta> get recetas {
+    //clear("recetas");
     if (!_loadedRecetas) {
       Receta.load().then((recetas) {
         _recetas = recetas;
@@ -41,6 +42,7 @@ class Data {
 
   void removeIngrediente(String key) {
     ingredientes.removeIngrediente(key);
+    //TODO: eliminar de recetas
     _saveIngredientes();
   }
 
@@ -76,31 +78,36 @@ class Data {
     _saveIngredientes();
   }
 
-  Receta addReceta(String nombreReceta, String nombresIngredientes) {
-    Receta nuevaReceta = _createReceta(nombreReceta, nombresIngredientes);
+  Receta addReceta(String nombreReceta) {
+    Receta nuevaReceta = _createReceta(nombreReceta);
     recetas.add(nuevaReceta);
     _saveRecetas();
 
     return nuevaReceta;
   }
 
+  Ingrediente getIngrediente(String key) {
+    return ingredientes.hashMap[key]!;
+  }
+
   List<Receta> cocinables() {
     List<Receta> cocinables = [];
-    Ingredientes ingredientesEnDespensa = filteredIngredientesInDespensa("");
+
     for (Receta receta in recetas) {
       bool cocinable = true;
-      for (Ingrediente ingrediente in receta.ingredientes.hashMap.values) {
-        if (ingredientesEnDespensa.hashMap
-                .containsKey(keyForNombre(ingrediente.nombre)) ==
-            false) {
+
+      for (String ingredienteKey in receta.idIngredientes) {
+        if (!getIngrediente(ingredienteKey).despensa) {
           cocinable = false;
           break;
         }
       }
+
       if (cocinable) {
         cocinables.add(receta);
       }
     }
+
     return cocinables;
   }
 
@@ -119,7 +126,7 @@ class Data {
 
   static Future<void> clear(String datos) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('$datos');
+    await prefs.remove(datos);
     print('Datos borrados de SharedPreferences: $datos');
   }
 
@@ -145,25 +152,12 @@ class Data {
     return [key, nuevoIngrediente];
   }
 
-  Receta _createReceta(String nombreReceta, String nombresIngredientes) {
-    List<String> listaNombresIngredientes =
-        nombresIngredientes.trim().split(',');
-
-    HashMap<String, Ingrediente> ingredientesRecetaHashMap = HashMap();
-
-    //Se añaden los ingredientes
-    for (int i = 0; i < listaNombresIngredientes.length; i++) {
-      List<dynamic> nuevoIngrediente =
-          addIngrediente(listaNombresIngredientes.elementAt(i));
-      ingredientesRecetaHashMap.putIfAbsent(
-          nuevoIngrediente[0], () => nuevoIngrediente[1]);
-    }
-
-    //Se crea la receta
-    Ingredientes ingredientesReceta = Ingredientes(ingredientesRecetaHashMap);
+  Receta _createReceta(String nombreReceta) {
+       
     nombreReceta = adecuateNombre(nombreReceta);
     String idReceta = keyForNombre(nombreReceta);
-    return Receta(idReceta, nombreReceta, ingredientesReceta);
+
+    return Receta(idReceta, nombreReceta, []);
   }
 
   Ingredientes filteredIngredientes(String searchTerm) {
@@ -200,5 +194,29 @@ class Data {
     });
 
     return filteredIngredientes;
+  }
+
+
+  Receta removeIngredienteFromReceta(String nombreIngrediente, Receta receta) {
+
+    Receta recetaModificada = recetas.firstWhere((element) => element.id == receta.id);
+    recetaModificada.idIngredientes.remove(keyForNombre(nombreIngrediente));
+
+    _saveRecetas();
+
+    return recetaModificada;
+  }
+
+  Receta addIngredienteToReceta(String nombreIngrediente, Receta receta) {
+
+    String ingredienteKey = addIngrediente(nombreIngrediente)[0];
+
+    Receta recetaModificada = recetas.firstWhere((element) => element.id == receta.id);
+    //TODO: no permitir repetidos
+    recetaModificada.idIngredientes.add(ingredienteKey);
+
+    _saveRecetas();
+
+    return recetaModificada;
   }
 }

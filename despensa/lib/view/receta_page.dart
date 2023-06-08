@@ -1,37 +1,30 @@
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
-
 import '../data/data.dart';
+import '../data/ingrediente.dart';
 import '../data/ingredientes.dart';
+import '../data/receta.dart';
 import '../main.dart';
 
-class IngredientesPage extends StatefulWidget {
-  const IngredientesPage({Key? key}) : super(key: key);
+class RecetaPage extends StatefulWidget {
+  Receta receta;
+  RecetaPage({super.key, required this.receta});
 
   @override
-  IngredientesPageState createState() => IngredientesPageState();
+  RecetaPageState createState() => RecetaPageState();
 }
 
-class IngredientesPageState extends State<IngredientesPage> {
+class RecetaPageState extends State<RecetaPage> {
   final TextEditingController _textEditingController = TextEditingController();
   TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
 
   @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(() {
-      _filterIngredientes();
-    });
-    _filterIngredientes();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredientes'),
+        title: Text(widget.receta.nombre),
       ),
       drawer: const DrawerNavigation(),
       body: Column(
@@ -48,39 +41,32 @@ class IngredientesPageState extends State<IngredientesPage> {
           ),
           Expanded(
             child: ListView.separated(
-              itemCount: _filteredIngredientes.hashMap.length,
+              itemCount: widget.receta.idIngredientes.length,
               separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {
+                final ingrediente = Data().getIngrediente(
+                    widget.receta.idIngredientes.elementAt(index));
                 return ListTile(
-                    title: Text(_filteredIngredientes.hashMap.values
-                        .elementAt(index)
-                        .nombre),
+                    title: Text(ingrediente.nombre),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (!_filteredIngredientes.hashMap.values
-                            .elementAt(index)
-                            .despensa)
+                        if (!ingrediente.despensa)
                           IconButton(
                             icon: const Icon(Icons.add_home),
-                            onPressed: () => _addIngredienteToDespensa(
-                                _filteredIngredientes.hashMap.keys
-                                    .elementAt(index)),
+                            onPressed: () =>
+                                _addIngredienteToDespensa(ingrediente.nombre),
                           ),
-                          if (!_filteredIngredientes.hashMap.values
-                            .elementAt(index)
-                            .compra)
-                        IconButton(
-                          icon: const Icon(Icons.add_shopping_cart),
-                          onPressed: () => _addIngredienteToCompra(
-                              _filteredIngredientes.hashMap.keys
-                                  .elementAt(index)),
-                        ),
+                        if (!ingrediente.compra)
+                          IconButton(
+                            icon: const Icon(Icons.add_shopping_cart),
+                            onPressed: () =>
+                                _addIngredienteToCompra(ingrediente.nombre),
+                          ),
                         IconButton(
                           icon: const Icon(Icons.close),
-                          onPressed: () => _removeIngrediente(
-                              _filteredIngredientes.hashMap.keys
-                                  .elementAt(index)),
+                          onPressed: () =>
+                              _removeIngrediente(ingrediente.nombre),
                         ),
                       ],
                     ));
@@ -96,14 +82,6 @@ class IngredientesPageState extends State<IngredientesPage> {
       ),
       bottomNavigationBar: const BottomNavigation(),
     );
-  }
-
-  void _filterIngredientes() {
-    String searchTerm = _searchController.text.toLowerCase();
-    Ingredientes filteredIngredientes = Data().filteredIngredientes(searchTerm);
-    setState(() {
-      _filteredIngredientes = filteredIngredientes;
-    });
   }
 
   void _createIngrediente() {
@@ -133,10 +111,9 @@ class IngredientesPageState extends State<IngredientesPage> {
     );
   }
 
-  void _removeIngrediente(String key) {
+  void _removeIngrediente(String nombreIngrediente) {
     setState(() {
-      Data().removeIngrediente(key);
-      Data().removeIngredienteFrom(key, _filteredIngredientes);
+      widget.receta=Data().removeIngredienteFromReceta(nombreIngrediente, widget.receta);
     });
   }
 
@@ -154,8 +131,8 @@ class IngredientesPageState extends State<IngredientesPage> {
 
   void _addIngrediente(String nombreIngrediente) {
     setState(() {
-      Data().addIngrediente(nombreIngrediente);
-      _filterIngredientes();
+      widget.receta =
+          Data().addIngredienteToReceta(nombreIngrediente, widget.receta);
     });
   }
 }

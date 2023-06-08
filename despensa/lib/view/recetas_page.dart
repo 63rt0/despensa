@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/data.dart';
 import '../main.dart';
+import 'receta_page.dart';
 
 class RecetasPage extends StatefulWidget {
   const RecetasPage({Key? key}) : super(key: key);
@@ -21,6 +22,7 @@ class RecetasPageState extends State<RecetasPage> {
       appBar: AppBar(
         title: const Text('Recetas'),
       ),
+      drawer: const DrawerNavigation(),
       body: Center(
         child: ListView.separated(
           itemCount: Data().recetas.length,
@@ -36,7 +38,7 @@ class RecetasPageState extends State<RecetasPage> {
                     onPressed: () => _editReceta(index),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(Icons.close),
                     onPressed: () => _removeReceta(index),
                   ),
                 ],
@@ -82,7 +84,7 @@ class RecetasPageState extends State<RecetasPage> {
                   String nombreReceta = _textEditingControllerNombre.text;
                   String ingredientesReceta =
                       _textEditingControllerIngredientes.text;
-                      _addReceta(nombreReceta, ingredientesReceta);
+                  _addReceta(nombreReceta, ingredientesReceta);
 
                   Navigator.of(context).pop();
                 });
@@ -95,8 +97,14 @@ class RecetasPageState extends State<RecetasPage> {
     );
   }
 
-
   void _editReceta(int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecetaPage(receta:Data().recetas.elementAt(index)),
+      ),
+    );
+    /*
     String nombreAntiguo = Data().recetas[index].nombre;
     String ingredientesAntiguo = Data().recetas[index].nombresIngredientes();
 
@@ -146,6 +154,7 @@ class RecetasPageState extends State<RecetasPage> {
         );
       },
     );
+    */
   }
 
   void _removeReceta(int index) {
@@ -154,11 +163,9 @@ class RecetasPageState extends State<RecetasPage> {
     });
   }
 
-    void _addReceta(String nombreReceta, String nombresIngredientes) {
+  void _addReceta(String nombreReceta, String nombresIngredientes) {
     setState(() {
-      Data().addReceta(nombreReceta, nombresIngredientes);
+      Data().addReceta(nombreReceta);
     });
   }
 }
-
-

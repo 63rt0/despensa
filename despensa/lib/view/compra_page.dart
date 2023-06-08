@@ -6,14 +6,14 @@ import '../data/data.dart';
 import '../data/ingredientes.dart';
 import '../main.dart';
 
-class ComprasPage extends StatefulWidget {
-  const ComprasPage({Key? key}) : super(key: key);
+class CompraPage extends StatefulWidget {
+  const CompraPage({Key? key}) : super(key: key);
 
   @override
-  ComprasPageState createState() => ComprasPageState();
+  CompraPageState createState() => CompraPageState();
 }
 
-class ComprasPageState extends State<ComprasPage> {
+class CompraPageState extends State<CompraPage> {
   final TextEditingController _textEditingController = TextEditingController();
   TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
@@ -31,8 +31,9 @@ class ComprasPageState extends State<ComprasPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Compras'),
+        title: const Text('Compra'),
       ),
+      drawer: const DrawerNavigation(),
       body: Column(
         children:[ 
           Padding(
@@ -56,13 +57,16 @@ class ComprasPageState extends State<ComprasPage> {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                if (!_filteredIngredientes.hashMap.values
+                            .elementAt(index)
+                            .despensa)
                 IconButton( 
-                    icon : const Icon(Icons.shopping_basket),
+                    icon : const Icon(Icons.shopping_cart_checkout),
                     onPressed: () => _moveIngredienteToDespensa(
                       _filteredIngredientes.hashMap.keys.elementAt(index)),
                 ),
                   IconButton( 
-                    icon : const Icon(Icons.delete),
+                    icon : const Icon(Icons.close),
                     onPressed: () => _removeIngredienteFromCompra(
                       _filteredIngredientes.hashMap.keys.elementAt(index)),
                 ),

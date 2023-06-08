@@ -8,13 +8,9 @@ part 'receta.g.dart';
 class Receta {
   final String id;
   final String nombre;
-  final Ingredientes ingredientes;
+  final List<String> idIngredientes;
 
-  Receta(this.id, this.nombre, this.ingredientes);
-
-  String nombresIngredientes() {
-    return ingredientes.hashMap.values.toList().map((ingrediente) => ingrediente.nombre).join(', ');
-  }
+  Receta(this.id, this.nombre, this.idIngredientes);
 
   factory Receta.fromJson(Map<String, dynamic> json) => _$RecetaFromJson(json);
 

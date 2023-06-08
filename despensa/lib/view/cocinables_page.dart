@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import '../data/data.dart';
 import '../data/receta.dart';
 import '../main.dart';
@@ -12,7 +11,7 @@ class CocinablesPage extends StatefulWidget {
 }
 
 class CocinablesPageState extends State<CocinablesPage> {
-  List<Receta> _recetasCocinables = Data().cocinables();
+  final List<Receta> _recetasCocinables = Data().cocinables();
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +19,7 @@ class CocinablesPageState extends State<CocinablesPage> {
       appBar: AppBar(
         title: const Text('Cocinables'),
       ),
+      drawer: const DrawerNavigation(),
       body: Center(
         child: ListView.separated(
           itemCount: _recetasCocinables.length,
@@ -31,7 +31,7 @@ class CocinablesPageState extends State<CocinablesPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.visibility),
+                    icon: const Icon(Icons.description),
                     onPressed: () => _viewReceta(index),
                   ),
                 ],
@@ -59,9 +59,9 @@ class CocinablesPageState extends State<CocinablesPage> {
             width: double.maxFinite,
             height: dialogHeight,
             child: ListView.builder(
-              itemCount: receta.ingredientes.hashMap.length,
+              itemCount: receta.idIngredientes.length,
               itemBuilder: (context, index) {
-                final ingrediente = receta.ingredientes.hashMap.values.elementAt(index);
+                final ingrediente = Data().getIngrediente(receta.idIngredientes.elementAt(index));
                 return ListTile(
                   title: Text(ingrediente.nombre),
                 );
