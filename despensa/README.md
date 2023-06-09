@@ -2,4 +2,4 @@
 
 Aplicación para la gestión de despensa y compras del hogar.
 
-# v0.1
+# v0.2

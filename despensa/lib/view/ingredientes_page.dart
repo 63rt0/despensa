@@ -15,7 +15,7 @@ class IngredientesPage extends StatefulWidget {
 
 class IngredientesPageState extends State<IngredientesPage> {
   final TextEditingController _textEditingController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
 
   @override

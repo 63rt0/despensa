@@ -41,8 +41,13 @@ class Data {
   }
 
   void removeIngrediente(String key) {
+    for (var receta in recetas) {
+      receta.idIngredientes
+          .removeWhere((idIngrediente) => idIngrediente == key);
+    }
+    _saveRecetas();
+
     ingredientes.removeIngrediente(key);
-    //TODO: eliminar de recetas
     _saveIngredientes();
   }
 
@@ -153,7 +158,6 @@ class Data {
   }
 
   Receta _createReceta(String nombreReceta) {
-       
     nombreReceta = adecuateNombre(nombreReceta);
     String idReceta = keyForNombre(nombreReceta);
 
@@ -196,11 +200,10 @@ class Data {
     return filteredIngredientes;
   }
 
-
-  Receta removeIngredienteFromReceta(String nombreIngrediente, Receta receta) {
-
-    Receta recetaModificada = recetas.firstWhere((element) => element.id == receta.id);
-    recetaModificada.idIngredientes.remove(keyForNombre(nombreIngrediente));
+  Receta removeIngredienteFromReceta(String key, Receta receta) {
+    Receta recetaModificada =
+        recetas.firstWhere((element) => element.id == receta.id);
+    recetaModificada.idIngredientes.remove(key);
 
     _saveRecetas();
 
@@ -208,12 +211,14 @@ class Data {
   }
 
   Receta addIngredienteToReceta(String nombreIngrediente, Receta receta) {
-
     String ingredienteKey = addIngrediente(nombreIngrediente)[0];
 
-    Receta recetaModificada = recetas.firstWhere((element) => element.id == receta.id);
-    //TODO: no permitir repetidos
-    recetaModificada.idIngredientes.add(ingredienteKey);
+    Receta recetaModificada =
+        recetas.firstWhere((element) => element.id == receta.id);
+        
+    if (!recetaModificada.idIngredientes.contains(ingredienteKey)) {
+      recetaModificada.idIngredientes.add(ingredienteKey);
+    }
 
     _saveRecetas();
 

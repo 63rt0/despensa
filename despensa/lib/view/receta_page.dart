@@ -1,9 +1,6 @@
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import '../data/data.dart';
-import '../data/ingrediente.dart';
-import '../data/ingredientes.dart';
 import '../data/receta.dart';
 import '../main.dart';
 
@@ -17,8 +14,7 @@ class RecetaPage extends StatefulWidget {
 
 class RecetaPageState extends State<RecetaPage> {
   final TextEditingController _textEditingController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
-  Ingredientes _filteredIngredientes = Ingredientes(HashMap());
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +40,9 @@ class RecetaPageState extends State<RecetaPage> {
               itemCount: widget.receta.idIngredientes.length,
               separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {
-                final ingrediente = Data().getIngrediente(
-                    widget.receta.idIngredientes.elementAt(index));
+                final idIngrediente = widget.receta.idIngredientes.elementAt(index);
+                final ingrediente = Data().getIngrediente(idIngrediente);
+
                 return ListTile(
                     title: Text(ingrediente.nombre),
                     trailing: Row(
@@ -55,18 +52,18 @@ class RecetaPageState extends State<RecetaPage> {
                           IconButton(
                             icon: const Icon(Icons.add_home),
                             onPressed: () =>
-                                _addIngredienteToDespensa(ingrediente.nombre),
+                                _addIngredienteToDespensa(idIngrediente),
                           ),
                         if (!ingrediente.compra)
                           IconButton(
                             icon: const Icon(Icons.add_shopping_cart),
                             onPressed: () =>
-                                _addIngredienteToCompra(ingrediente.nombre),
+                                _addIngredienteToCompra(idIngrediente),
                           ),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () =>
-                              _removeIngrediente(ingrediente.nombre),
+                              _removeIngrediente(idIngrediente),
                         ),
                       ],
                     ));
@@ -111,9 +108,9 @@ class RecetaPageState extends State<RecetaPage> {
     );
   }
 
-  void _removeIngrediente(String nombreIngrediente) {
+  void _removeIngrediente(String key) {
     setState(() {
-      widget.receta=Data().removeIngredienteFromReceta(nombreIngrediente, widget.receta);
+      widget.receta=Data().removeIngredienteFromReceta(key, widget.receta);
     });
   }
 

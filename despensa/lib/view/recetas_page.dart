@@ -11,10 +11,7 @@ class RecetasPage extends StatefulWidget {
 }
 
 class RecetasPageState extends State<RecetasPage> {
-  final TextEditingController _textEditingControllerIngredientes =
-      TextEditingController();
-  final TextEditingController _textEditingControllerNombre =
-      TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -62,32 +59,18 @@ class RecetasPageState extends State<RecetasPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Añadir receta'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _textEditingControllerNombre,
-                  decoration: const InputDecoration(hintText: 'Nombre'),
-                ),
-                TextField(
-                  controller: _textEditingControllerIngredientes,
-                  decoration: const InputDecoration(
-                      hintText: 'Ingredientes separados por comas'),
-                ),
-              ],
-            ),
+          content: TextField(
+            controller: _textEditingController,
+            decoration: const InputDecoration(hintText: 'Nombre de la receta'),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                setState(() {
-                  String nombreReceta = _textEditingControllerNombre.text;
-                  String ingredientesReceta =
-                      _textEditingControllerIngredientes.text;
-                  _addReceta(nombreReceta, ingredientesReceta);
-
-                  Navigator.of(context).pop();
-                });
+                String nombreReceta = _textEditingController.text;
+                _addReceta(nombreReceta);
+                _textEditingController.clear();
+                Navigator.of(context).pop();
+                _editReceta(Data().recetas.length-1);
               },
               child: const Text('Añadir'),
             ),
@@ -101,60 +84,10 @@ class RecetasPageState extends State<RecetasPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RecetaPage(receta:Data().recetas.elementAt(index)),
+        builder: (context) =>
+            RecetaPage(receta: Data().recetas.elementAt(index)),
       ),
     );
-    /*
-    String nombreAntiguo = Data().recetas[index].nombre;
-    String ingredientesAntiguo = Data().recetas[index].nombresIngredientes();
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Editar receta'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _textEditingControllerNombre,
-                  decoration: InputDecoration(
-                    hintText: nombreAntiguo,
-                  ),
-                ),
-                TextField(
-                  controller: _textEditingControllerIngredientes,
-                  decoration: InputDecoration(
-                    hintText: ingredientesAntiguo,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  String nombreReceta =
-                      (_textEditingControllerNombre.text == '')
-                          ? nombreAntiguo
-                          : _textEditingControllerNombre.text;
-                  String nombresIngredientes =
-                      (_textEditingControllerIngredientes.text == '')
-                          ? ingredientesAntiguo
-                          : _textEditingControllerIngredientes.text;
-                  _removeReceta(index);
-                  _addReceta(nombreReceta, nombresIngredientes);
-                  Navigator.of(context).pop();
-                });
-              },
-              child: const Text('Modificar'),
-            ),
-          ],
-        );
-      },
-    );
-    */
   }
 
   void _removeReceta(int index) {
@@ -163,7 +96,7 @@ class RecetasPageState extends State<RecetasPage> {
     });
   }
 
-  void _addReceta(String nombreReceta, String nombresIngredientes) {
+  void _addReceta(String nombreReceta) {
     setState(() {
       Data().addReceta(nombreReceta);
     });

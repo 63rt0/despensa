@@ -15,7 +15,7 @@ class CompraPage extends StatefulWidget {
 
 class CompraPageState extends State<CompraPage> {
   final TextEditingController _textEditingController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
 
   @override

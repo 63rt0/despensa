@@ -15,7 +15,7 @@ class DespensaPage extends StatefulWidget {
 
 class DespensaPageState extends State<DespensaPage> {
   final TextEditingController _textEditingController = TextEditingController();
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   Ingredientes _filteredIngredientes = Ingredientes(HashMap());
 
   @override
